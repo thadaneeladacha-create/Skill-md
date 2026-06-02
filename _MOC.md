@@ -54,6 +54,14 @@ created: 2026-05-13
 
 ---
 
+## 🐳 Docker Skills
+
+| ชื่อ | โฟลเดอร์ | หน้าที่ |
+|---|---|---|
+| [[Docker/n8n-mysql/SKILL\|n8n-mysql]] | `Docker/n8n-mysql` | แก้ปัญหา n8n MySQL node ใน Docker — ETIMEDOUT, subnet conflict |
+
+---
+
 ## 🤖 Machine-learning Skills
 
 | ชื่อ                       | โฟลเดอร์                   | หน้าที่                                         |
