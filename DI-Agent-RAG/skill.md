@@ -93,9 +93,31 @@ n8n workflow RAG สำหรับโรงงาน Dicing — ตอบคำ
 
 ---
 
+## Image Hosting (deployment) — สำคัญ
+
+รูปต้องเสิร์ฟจาก **origin เดียวกับ UI** ไม่งั้น user เห็นรูปไม่ได้
+- UI อยู่ที่ `http://172.18.106.100:8888/DI-Agent/` (PHP) ; `formatMarkdown` แปลง `![](url)` → `<img src=url>` → browser user ต้องเข้าถึง url นั้น
+- ❌ ห้ามชี้ url ไปเครื่อง dev/docker (`172.18.113.242:8089`) — คนละ subnet, user เข้าไม่ถึง
+- ✅ รูปอยู่ `\\172.18.106.100\www\DI-Agent\images\` → url `http://172.18.106.100:8888/DI-Agent/images/...` (same-origin, ไม่มี CORS)
+- URL base ตั้งใน Local file watcher node **"Transform Image Paths"** (เอกสารใหม่) + rewrite ใน Qdrant (เอกสารเก่า)
+- **n8n container เขียน SMB share ไม่ได้** (เห็นแค่ volume) → ต้อง `robocopy extracted-images → share` ที่ **host** หลัง ingest
+- สถาปัตยกรรม UI: file-queue relay (`proxy.php` เขียน .req ลง share → relay_client บน dev อ่านส่ง n8n → เขียน .res) เพราะ web server เข้า n8n ตรงไม่ได้
+
+## VLM Captioning (แก้ textless image)
+
+figure ที่ฝังข้อความในรูป (flowchart/ตาราง scan) → Docling ได้ chunk **ไร้ข้อความ** (`# [IMG][IMG]`) → search ไม่เจอ → ไม่เคยถูกแนบ
+- ตรวจ: count chunk ที่มีรูป แต่ text < 25 ตัวอักษร (เคยเจอ 17 chunks / ~73 รูป)
+- **กรองด้วยขนาดไฟล์**: ≥40KB = figure จริง (~22 รูป), <40KB = ลายน้ำ/ป้าย ("For Reference"/"CORRECT") ข้าม
+- แก้ = caption ด้วย **local VLM `qwen2.5vl:7b`** (offline — เอกสาร internal ห้าม API ออก): โหลดรูป → caption ไทย → prepend เป็นข้อความ → re-embed → upsert ทับ id เดิม (post-process ไม่ต้อง re-ingest)
+- VLM caveats: หลุดภาษาจีน (ต้อง strip CJK) ; บางทีผิด logic (เช่น สลับ % ใน flowchart)
+- ปัจจุบันเป็น **script รันมือ** ไม่ได้อยู่ใน pipeline — เอกสารใหม่ต้องรันซ้ำ (หรือ integrate เป็น node ใน watcher / เปิด Docling `do_picture_description`)
+- ทางเลือกถ้า VLM คุณภาพไม่พอ: ถอด flowchart มือ (Claude อ่านรูปได้) + ฝัง image inline แบบ polymer/uncut/scrap
+
+---
+
 ## Conversation Reference
 
-สร้าง: 2026-06-24
+สร้าง: 2026-06-24 | อัปเดต: 2026-06-25
 
 แก้หลักตลอด session:
 - รูป: dominant-source → rank-1 answerSrc + PDF-aware
@@ -105,3 +127,7 @@ n8n workflow RAG สำหรับโรงงาน Dicing — ตอบคำ
 - generation: Thai-only แรงขึ้น + CJK strip ; TYPE A/B deterministic
 - transcribe flowchart (uncut image_000005 / scrap NG image_000003) เป็น chunk + รูป
 - rebuild processflow.md จาก table junk เป็น 13 clean chunks + intent boost
+- (รอบ 2) Append Images: rank-1 answerSrc + กรอง revision-history chunk + overlap re-rank ตามคำตอบ
+- (รอบ 2) ย้าย image hosting → www server (172.18.106.100:8888) + rewrite URL ใน Qdrant + Local file watcher
+- (รอบ 2) VLM captioning textless figures (qwen2.5vl:7b, ≥40KB) — textless 17→9
+- (รอบ 2) วินิจฉัย: รูป polymer ไม่เคยถูกเพราะ image_000035 อยู่ chunk ไร้ข้อความ ; qwen2.5:7b ไม่เสถียร (สุ่มหลุดจีน) แต่ user เลือกคงไว้
