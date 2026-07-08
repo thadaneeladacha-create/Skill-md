@@ -77,6 +77,30 @@ created: 2026-05-13
 
 ---
 
+## 🔬 SPC Skills
+
+| ชื่อ | โฟลเดอร์ | หน้าที่ |
+|---|---|---|
+| [[SPC/spc-pdf-note/SKILL\|spc-pdf-note]] | `SPC/spc-pdf-note` | อ่าน PDF สแกน (render ผ่าน WinRT) → สรุปเป็น `.md` mirror D:\SPC↔Obsidian → อัปเดต hub note/daily log → สกัด diagram → ทำ interactive mind map (bundled `scripts/render-pdf.ps1`, `assets/mindmap-template.html`) |
+
+---
+
+## 🚀 Deployed to Claude Code
+
+ติดตั้งแล้วที่ `~/.claude/skills/` บนเครื่อง Lamphun (2026-07-08) — ใช้งานได้จริงผ่าน `/skill-name` ทุก session:
+
+| Skill folder ใน vault | ติดตั้งเป็นชื่อ | สถานะ |
+|---|---|---|
+| `DI-Agent-RAG/skill.md` | `di-agent-rag` | ✅ ติดตั้งแล้ว |
+| `Docker/n8n-mysql/SKILL.md` | `n8n-docker-mysql` | ✅ ติดตั้งแล้ว |
+| `Machine-learning/Alpha/SKILL.md` | `ai-agent-ml` | ✅ ติดตั้งแล้ว |
+| `Machine-learning/Bravo/SKILL.md` + `assets/` | `machine-learning` | ✅ ติดตั้งแล้ว |
+| `Machine-learning/Charlie/SKILL.md` | `ml-report` | ✅ ติดตั้งแล้ว |
+| `SPC/spc-pdf-note/SKILL.md` + `scripts/` + `assets/` | `spc-pdf-note` | ✅ ติดตั้งแล้ว |
+| `OEE/skill.md` | — | ❌ ยังไม่ใช่ skill จริง (ไม่มี YAML frontmatter — เป็นแค่ project note) |
+
+---
+
 ## 🏷️ Tags หลัก
 
 - `#MOC` — index
@@ -104,3 +128,5 @@ created: 2026-05-13
 
 - 2026-05-13: สร้าง vault ครั้งแรก
 - 2026-05-13: เพิ่ม Machine-learning skills (Alpha, Bravo, Charlie) และ restructure folder
+- 2026-07-08: ติดตั้ง 5 skills (di-agent-rag, n8n-docker-mysql, ai-agent-ml, machine-learning, ml-report) เข้า `~/.claude/skills/` บนเครื่อง Lamphun — ใช้งานได้แล้วผ่าน Claude Code ทุก session; mirror vault มาไว้ที่ `D:\Obsidian\Thadaverse\Projects\Skill-md` (ก่อนหน้านี้มีแค่บน GitHub)
+- 2026-07-08 (เย็น): สร้าง skill ใหม่ `SPC/spc-pdf-note` จากงานสรุป AIAG SPC Chapter 1 วันนี้ (PDF สแกน → WinRT render → สรุป `.md` mirror → mind map) ติดตั้งเข้า `~/.claude/skills/` แล้ว และเพิ่มเข้า vault + ตาราง deployment
