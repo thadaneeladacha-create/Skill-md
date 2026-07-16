@@ -85,6 +85,14 @@ created: 2026-05-13
 
 ---
 
+## 🧩 Tooling Notes
+
+| ชื่อ | โฟลเดอร์ | หน้าที่ |
+|---|---|---|
+| [[Claudian/install-guide\|Claudian install guide]] | `Claudian` | ติดตั้ง Claudian (Claude Code ใน Obsidian sidebar) บน Windows — gotcha: ไม่มีใน community store, id จริงคือ `realclaudian`, ตั้ง CLI path เอง, default เป็น YOLO mode |
+
+---
+
 ## 🚀 Deployed to Claude Code
 
 ติดตั้งแล้วที่ `~/.claude/skills/` บนเครื่อง Lamphun (2026-07-08) — ใช้งานได้จริงผ่าน `/skill-name` ทุก session:
@@ -130,3 +138,4 @@ created: 2026-05-13
 - 2026-05-13: เพิ่ม Machine-learning skills (Alpha, Bravo, Charlie) และ restructure folder
 - 2026-07-08: ติดตั้ง 5 skills (di-agent-rag, n8n-docker-mysql, ai-agent-ml, machine-learning, ml-report) เข้า `~/.claude/skills/` บนเครื่อง Lamphun — ใช้งานได้แล้วผ่าน Claude Code ทุก session; mirror vault มาไว้ที่ `D:\Obsidian\Thadaverse\Projects\Skill-md` (ก่อนหน้านี้มีแค่บน GitHub)
 - 2026-07-08 (เย็น): สร้าง skill ใหม่ `SPC/spc-pdf-note` จากงานสรุป AIAG SPC Chapter 1 วันนี้ (PDF สแกน → WinRT render → สรุป `.md` mirror → mind map) ติดตั้งเข้า `~/.claude/skills/` แล้ว และเพิ่มเข้า vault + ตาราง deployment
+- 2026-07-16: เพิ่ม `Claudian/install-guide` — คู่มือติดตั้ง Claudian (Claude Code ใน Obsidian) แบบพกพา สำหรับใช้ตอนติดตั้งบนเครื่องอื่น
