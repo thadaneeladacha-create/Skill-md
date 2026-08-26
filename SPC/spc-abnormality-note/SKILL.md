@@ -5,10 +5,10 @@ description: ใช้ skill นี้เมื่อ Thada มีไฟล์ E
 
 # SPC Abnormality Investigation: Excel → Analysis → Root-Cause Note
 
-ขั้นตอนมาตรฐานสำหรับสืบสวนปัญหา/abnormality ที่มีข้อมูลอยู่ใน Excel: ดึงข้อมูลมาวิเคราะห์ (ตรวจสอบงานเดิมของ Thada ก่อนเสมอถ้ามี), สรุปเป็น knowledge note พร้อม root-cause flow diagram, mirror เข้า `D:\SPC` + Obsidian ตาม convention เดิม
+ขั้นตอนมาตรฐานสำหรับสืบสวนปัญหา/abnormality ที่มีข้อมูลอยู่ใน Excel: ดึงข้อมูลมาวิเคราะห์ (ตรวจสอบงานเดิมของ Thada ก่อนเสมอถ้ามี), สรุปเป็น knowledge note พร้อม root-cause flow diagram, เก็บใน Obsidian vault เป็น source of truth เดียว (ไม่ mirror เข้า `D:\SPC` อีกต่อไป — raw Excel ต้นฉบับยังอยู่ที่ `D:\SPC\abnormal\` ตามเดิม)
 
 ## 0. เช็ค convention ที่มีอยู่ก่อนเสมอ
-อ่าน `D:\SPC\notes\SPC Home.md` และ `notes\daily\` ล่าสุดก่อน ดูว่าเรื่องนี้เคยมี note อยู่แล้วหรือยัง (ถ้ามี ให้ **อัปเดต note เดิม** ไม่สร้างไฟล์ใหม่ซ้ำ) และดูว่ามี action item ค้างเกี่ยวกับไฟล์นี้ไหม (เช่น ANOVA ที่ Thada ต้องทำส่ง)
+อ่าน `D:\Obsidian\Thadaverse\Projects\SPC\SPC Home.md`, `daily\` ล่าสุด, และโฟลเดอร์ `Projects\SPC\abnormal\<issue-name>\` ที่เกี่ยวข้องก่อน ดูว่าเรื่องนี้เคยมี note อยู่แล้วหรือยัง (ถ้ามี ให้ **อัปเดต note เดิม** ไม่สร้างไฟล์ใหม่ซ้ำ) และดูว่ามี action item ค้างเกี่ยวกับไฟล์นี้ไหม (เช่น ANOVA ที่ Thada ต้องทำส่ง)
 
 ## 1. ดึงข้อมูลจาก Excel มาวิเคราะห์
 
@@ -55,13 +55,16 @@ $img.Save($outPath, [System.Drawing.Imaging.ImageFormat]::Png)
 
 ## 3. เขียนสรุปเป็น knowledge note (`.md`)
 
-ตาม convention เดียวกับ [[spc-pdf-note]]:
+**ที่ตั้งไฟล์ (convention ตั้งแต่ 2026-07-17 — ต่างจาก `spc-pdf-note`):** note การสืบสวน abnormality ไม่ได้อยู่ใน `knowledge\` แต่รวมทุกอย่างของ investigation เดียวกันไว้ในโฟลเดอร์ย่อยของตัวเอง เพื่อให้ raw data + note อยู่ด้วยกัน:
 ```
-D:\SPC\notes\knowledge\<slug>.md                          <- ต้นทาง
-D:\Obsidian\Thadaverse\Projects\SPC\knowledge\<slug>.md    <- mirror, byte-identical
+D:\Obsidian\Thadaverse\Projects\SPC\abnormal\<issue-name>\   <- source of truth เดียว (ไม่ mirror เข้า D:\SPC)
+  <issue>-abnormality.md          <- 3. สรุป result (note หลัก)
+  meeting-YYYY-MM-DD-<topic>.md   <- 2. action plan / meeting note (ถ้ามี)
+  assets\                          <- รูปที่สกัดมา
 ```
+ส่วน **1. ข้อมูลดิบ** (source `.xlsx`, diagram/photo ต้นฉบับ) ยังอยู่ที่ `D:\SPC\abnormal\<issue-name>\` ตามเดิม (ไม่ mirror เข้าวอลต์ — เป็น working file)
 - ผสมไทย+อังกฤษ, มี `🏠 [[SPC Home]]` backlink ต้นไฟล์
-- รูปที่สกัดมาเก็บที่ `notes\knowledge\assets\` (mirror เหมือนกัน) อ้างอิงด้วย `![alt](assets/xxx.png)` ธรรมดา ไม่ใช้ `![[ ]]`
+- รูปที่สกัดมาเก็บที่ `Projects\SPC\abnormal\<issue-name>\assets\` ใน vault อ้างอิงด้วย `![alt](assets/xxx.png)` ธรรมดา ไม่ใช้ `![[ ]]`
 - **สรุปให้กระชับ** — ใส่เฉพาะค่าสถิติสำคัญ (เช่น F/P/R-Sq/mean ranking) ไม่ต้องยกตาราง DF/SS/MS/Error เต็มทุกตัวเลข เว้นแต่ผู้ใช้ขอ ถ้าต้องการ CI ให้โชว์แบบ **visual** (เช่น ASCII CI-plot จาก Minitab ตรงๆ ในโค้ดบล็อก) ไม่ใช่ตัวเลข bracket ธรรมดา
 - ถ้ามีรูปกราฟประกอบ (จาก §2) ให้รูปนั้นมีแค่ตัวกราฟ ไม่ต้องมีตาราง/text ค่าซ้ำกับที่สรุปเป็น text ไว้แล้วในเนื้อหา (กันข้อมูลซ้ำซ้อน)
 - อัปเดต Action Items table ในไฟล์เดิม (ถ้ามี) แทนเขียนใหม่ — ระบุสถานะ "Completed (draft, รอ [ชื่อผู้รับผิดชอบ] review)" ถ้างานนี้ทำแทนคนอื่นเป็น draft ไม่ใช่ปิดงานเด็ดขาด
@@ -78,7 +81,7 @@ D:\Obsidian\Thadaverse\Projects\SPC\knowledge\<slug>.md    <- mirror, byte-ident
 เขียนเป็น numbered/bullet list สั้นๆ ก่อนแผนภาพ (จับใจความสำคัญ 2-4 ข้อ อ้างอิงตัวเลขที่คำนวณได้) แล้วค่อยตามด้วยแผนภาพ — Thada ต้องการทั้งสองแบบคู่กัน (text สรุป + visual)
 
 ## 6. อัปเดต hub note และ daily log
-เหมือน [[spc-pdf-note]] §6 — เพิ่ม wikilink ใน `SPC Home.md` (ทั้งสองที่) และอัปเดต `notes\daily\YYYY-MM-DD.md` (+ mirror)
+เหมือน [[spc-pdf-note]] §6 — เพิ่ม wikilink ใน `SPC Home.md` และอัปเดต `daily\YYYY-MM-DD.md` ใน vault
 
 ## หมายเหตุสภาพแวดล้อม / Excel COM gotchas (เจอมาแล้วจริง เสียเวลาไปเยอะ)
 

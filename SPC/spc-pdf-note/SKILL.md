@@ -1,15 +1,15 @@
 ---
 name: spc-pdf-note
-description: ใช้ skill นี้เมื่อ Thada ให้ไฟล์ PDF (โดยเฉพาะสแกน ไม่มี text layer เช่น AIAG manual, Hana Flow, work instruction) แล้วขอให้อ่าน/สรุปเป็นความรู้เก็บไว้ใน SPC knowledge base — ครอบคลุมขั้นตอน render PDF เป็นภาพด้วย Windows.Data.Pdf WinRT API (ไม่ต้องติดตั้ง poppler), หาขอบเขตบท/หน้าจากสารบัญ, อ่านทีละหน้าด้วย multimodal Read, เขียนสรุปเป็น .md แบบผสมไทย+อังกฤษ mirror ระหว่าง D:\SPC และ Obsidian, อัปเดต hub note + daily log, สกัด diagram สำคัญมาแนบ, และสร้าง interactive mind map สไตล์ PCB-trace ถ้าต้องการ — trigger เมื่อพูดถึง "สรุป PDF", "อ่านหนังสือ SPC", "สรุปบทที่...", "ทำ mind map", หรือให้ไฟล์ PDF ในโฟลเดอร์ D:\SPC\research
+description: ใช้ skill นี้เมื่อ Thada ให้ไฟล์ PDF (โดยเฉพาะสแกน ไม่มี text layer เช่น AIAG manual, Hana Flow, work instruction) แล้วขอให้อ่าน/สรุปเป็นความรู้เก็บไว้ใน SPC knowledge base — ครอบคลุมขั้นตอน render PDF เป็นภาพด้วย Windows.Data.Pdf WinRT API (ไม่ต้องติดตั้ง poppler), หาขอบเขตบท/หน้าจากสารบัญ, อ่านทีละหน้าด้วย multimodal Read, เขียนสรุปเป็น .md แบบผสมไทย+อังกฤษ เก็บใน Obsidian vault เป็น source of truth เดียว (ไม่ mirror เข้า D:\SPC อีกต่อไป), อัปเดต hub note + daily log, สกัด diagram สำคัญมาแนบ, และสร้าง interactive mind map สไตล์ PCB-trace ถ้าต้องการ — trigger เมื่อพูดถึง "สรุป PDF", "อ่านหนังสือ SPC", "สรุปบทที่...", "ทำ mind map", หรือให้ไฟล์ PDF ในโฟลเดอร์ D:\SPC\research
 ---
 
 # SPC PDF → Knowledge Note (+ optional mind map)
 
-ขั้นตอนมาตรฐานสำหรับอ่านเอกสาร PDF (ส่วนใหญ่เป็นสแกน ไม่มี text layer) แล้วสรุปเข้า knowledge base ของ Thada ที่ `D:\SPC` (mirror กับ Obsidian vault `D:\Obsidian\Thadaverse\Projects\SPC`)
+ขั้นตอนมาตรฐานสำหรับอ่านเอกสาร PDF (ส่วนใหญ่เป็นสแกน ไม่มี text layer) แล้วสรุปเข้า knowledge base ของ Thada ใน Obsidian vault `D:\Obsidian\Thadaverse\Projects\SPC` — vault คือ source of truth เดียวสำหรับ note `.md` ทั้งหมด (ไม่ mirror เข้า `D:\SPC` อีกต่อไป) ส่วน `D:\SPC` เก็บเฉพาะไฟล์ทำงานดิบ (PDF ต้นฉบับใน `research\`, Excel summary ใน `summaries\`)
 
 ## 0. เช็ค convention ที่มีอยู่ก่อนเสมอ
 
-อ่าน `D:\SPC\notes\SPC Home.md` และไฟล์ `notes\daily\` ล่าสุดก่อน เพื่อดูว่าหัวข้อนี้เคยสรุปไปหรือยัง และ convention ปัจจุบันเป็นแบบไหน (บางเอกสารอาจตกลง convention เฉพาะกับ Thada ไว้แล้ว เช่น "แยกไฟล์ต่อบท", "ไม่มี Excel summary" — อย่าถือว่า convention ของเอกสารหนึ่งใช้กับทุกเอกสาร)
+อ่าน `D:\Obsidian\Thadaverse\Projects\SPC\SPC Home.md` และไฟล์ `daily\` ล่าสุดก่อน เพื่อดูว่าหัวข้อนี้เคยสรุปไปหรือยัง และ convention ปัจจุบันเป็นแบบไหน (บางเอกสารอาจตกลง convention เฉพาะกับ Thada ไว้แล้ว เช่น "แยกไฟล์ต่อบท", "ไม่มี Excel summary" — อย่าถือว่า convention ของเอกสารหนึ่งใช้กับทุกเอกสาร)
 
 ## 1. ตรวจว่า PDF อ่าน text ตรงได้ไหม
 
@@ -40,10 +40,9 @@ Render เป็นชุด (ครั้งละ ~10-20 หน้าต่อ
 
 ## 5. เขียนสรุปเป็น `.md`
 
-**ที่ตั้งไฟล์และ mirror convention:**
+**ที่ตั้งไฟล์ (source of truth เดียว):**
 ```
-D:\SPC\notes\knowledge\<slug>.md              <- ต้นทาง
-D:\Obsidian\Thadaverse\Projects\SPC\knowledge\<slug>.md   <- mirror, เนื้อหาต้อง byte-identical
+D:\Obsidian\Thadaverse\Projects\SPC\knowledge\<slug>.md
 ```
 
 **กฎเนื้อหา (ยืนยันกับ Thada แล้ว ใช้เป็นค่าเริ่มต้น):**
@@ -59,14 +58,14 @@ D:\Obsidian\Thadaverse\Projects\SPC\knowledge\<slug>.md   <- mirror, เนื�
 
 ## 6. อัปเดต hub note และ daily log
 
-- เพิ่มลิงก์ `[[<slug>]]` แบบ wikilink จริง (ไม่ใช่ plain text) ในส่วน `## Knowledge` ของ `SPC Home.md` **ทั้งสองที่** (D:\SPC และ Obsidian) — plain-text ไม่สร้าง graph edge ใน Obsidian
-- อัปเดต/สร้าง `notes\daily\YYYY-MM-DD.md` (+ mirror) บันทึกว่าทำอะไร, key finding, งานค้าง, next step — ตาม pattern ของไฟล์ daily log เดิม
+- เพิ่มลิงก์ `[[<slug>]]` แบบ wikilink จริง (ไม่ใช่ plain text) ในส่วน `## Knowledge` ของ `SPC Home.md` — plain-text ไม่สร้าง graph edge ใน Obsidian
+- อัปเดต/สร้าง `daily\YYYY-MM-DD.md` บันทึกว่าทำอะไร, key finding, งานค้าง, next step — ตาม pattern ของไฟล์ daily log เดิม
 
 ## 7. (ถ้าต้องการ) สกัดภาพ diagram สำคัญ
 
 ถ้า Thada ต้องการภาพประกอบ:
 - เลือกเฉพาะ diagram/figure สำคัญ (~1 ภาพต่อ section ใหญ่ ไม่ต้องทุกหน้า) จากภาพที่ render ไว้แล้วในขั้นตอนที่ 4 — ไม่ต้อง crop ก็ได้ ใช้ full-page render ตรงๆ ได้เลย (เป็น pattern ที่ใช้มาตลอด)
-- Copy ไปที่ `notes\knowledge\assets\NN-descriptive-name.png` (ตั้งชื่อบรรยาย ไม่ใช้ `page-0XX.png`) + mirror ไป Obsidian assets โฟลเดอร์เดียวกัน
+- Copy ไปที่ `Projects\SPC\knowledge\assets\NN-descriptive-name.png` ใน vault (ตั้งชื่อบรรยาย ไม่ใช้ `page-0XX.png`)
 - อ้างอิงในเนื้อหา `.md` ด้วย markdown ธรรมดา `![alt](assets/NN-descriptive-name.png)` (**ห้าม** ใช้ Obsidian wikilink embed `![[ ]]`) เพื่อให้ภาพขึ้นทั้งใน Obsidian และตอนเปิดไฟล์ธรรมดา — วางรูปไว้เหนือย่อหน้าที่เกี่ยวข้องกับ diagram นั้น
 
 ## 8. (ถ้าต้องการ) สร้าง interactive mind map
@@ -77,7 +76,7 @@ D:\Obsidian\Thadaverse\Projects\SPC\knowledge\<slug>.md   <- mirror, เนื�
 2. แก้ 4 จุดที่ comment กำกับไว้ในไฟล์ (`EDIT 1`-`EDIT 4`): header text, hint text, legend labels, และ `const DATA` tree
 3. ออกแบบ `DATA` tree จากเนื้อหาที่สรุปไว้แล้วใน `.md` — แนะนำ **4 กิ่งหลัก (L1)** เพื่อความสมดุลของภาพ, เก็บ label สั้น (2-4 คำต่อบรรทัด, node กว้างคงที่ 236px), ใส่ `detail` ทุก node ที่มีเนื้อหาจริง (คลิกแล้วเปิด panel), `tag` เป็น section reference (เช่น `"SECTION E"`)
 4. ถ้ามีรูปจากขั้นตอนที่ 7 อยากให้โผล่ใน mind map ด้วย: แปลงเป็น base64 แล้วใส่เป็น `img: ["data:image/png;base64,..."]` ในโหนดที่เกี่ยวข้อง — **อย่า paste base64 ยาวๆ ผ่าน Edit/Write tool ตรงๆ** (กิน context มหาศาล) ให้เขียน PowerShell script อ่านไฟล์รูปด้วย `[System.IO.File]::ReadAllBytes` + `[Convert]::ToBase64String` แล้วต่อ string เข้าไฟล์ HTML ด้วย `[System.IO.File]::ReadAllText`/`WriteAllText` (UTF8 no-BOM) แทน — ดูตัวอย่าง pattern ได้จาก daily log 2026-07-08 ถ้าต้องการ
-5. Mirror ไฟล์ .html ไป Obsidian assets โฟลเดอร์เดียวกัน แล้วเปิดด้วย `Start-Process "<path>"` เพื่อตรวจดูก่อนแจ้งผู้ใช้ว่าเสร็จ
+5. เปิดด้วย `Start-Process "<path>"` เพื่อตรวจดูก่อนแจ้งผู้ใช้ว่าเสร็จ
 
 ## หมายเหตุสภาพแวดล้อม (เครื่องนี้)
 

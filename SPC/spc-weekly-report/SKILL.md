@@ -67,6 +67,32 @@ $ws.Name = "Thada"   # ชื่อ sheet เดิมตาม week ก่อ�
 - ใช้ `WrapText = $true` และตั้ง `RowHeight` ให้พออ่านง่าย (~60pt)
 - Column widths: Summary column กว้างสุด (~45), Activity/Remark รองลงมา
 
+**⚠️ Visual style ต้องตรงกับสัปดาห์ก่อนหน้าเป๊ะ (สี, ตำแหน่ง text, alignment) — decoded จาก Week6 ด้วย Excel COM 2026-08-21, ยืนยันกับ Thada แล้ว:**
+
+ห้ามเดาสีจาก `.Interior.Color`/`.Font.Color` ตรงๆ (เป็น OLE BGR-packed int อ่านตาไม่ออก) ให้ decode ด้วย:
+```powershell
+Add-Type -AssemblyName System.Drawing
+[System.Drawing.ColorTranslator]::FromOle($colorValue)   # -> ได้ R/G/B จริง
+[System.Drawing.ColorTranslator]::ToOle($rgbColor)        # -> แปลงกลับตอนเขียนค่า
+```
+
+สี/ตำแหน่งมาตรฐาน (ใช้ script อ้างอิง `scripts/build-weekly-excel-template.ps1` เป็นจุดเริ่ม ไม่ใช่รันเฉยๆ โดยไม่ปรับ):
+
+| องค์ประกอบ | สี/ตำแหน่ง |
+|---|---|
+| Font | Calibri ทั้งไฟล์ (body 11pt, title 14pt bold) |
+| Title (A1) | ตัวอักษรสี NAVY `#002060`, bold, 14pt, พื้นขาว |
+| Update badge (H1, เช่น "Update: 21 Aug 2026") | ตัวอักษรขาวตัวหนา บนพื้น CORAL `#F23A73`, จัดกลาง |
+| Header row (row 3) | ตัวอักษรขาวตัวหนา บนพื้น NAVY `#002060`, จัดกลางทั้งแนวนอน-แนวตั้ง |
+| Data rows — ทุกคอลัมน์ ยกเว้น Summary | จัดกลางทั้งแนวนอน-แนวตั้ง |
+| Summary column (E) | จัดชิดซ้าย-บน (ไม่ใช่กลาง), **ตัวอักษรสี NAVY** `#002060` (ไม่ใช่ดำ) |
+| WW column (A) | **merge cell ข้ามทุกแถวข้อมูลของสัปดาห์นั้น** (เช่น `A4:A8`) เป็นค่าเดียว `"WW34"` จัดกลาง — ไม่ใช่แยกทีละแถว |
+| Status column (I) fill | `Completed` → GREEN `#A9D08E`, `In-progress` → GOLD `#FFE699`, ว่าง/holiday → ไม่ต้องเติม (ดูแถว holiday ด้านล่าง) |
+| Border | **ไม่มี** cell border ชัดเจน — อาศัย Excel gridlines ปกติ (`DisplayGridlines = True`) เท่านั้น อย่าใส่ border เพิ่มเอง |
+| แถว holiday (ถ้ามีวันหยุดในสัปดาห์) | ทั้งแถว (col C ถึง J) fill NAVY `#002060` + ตัวอักษรขาวตัวหนา, ใส่คำว่า `"Holiday"` ในคอลัมน์ Date, col A/B (WW/Day) ไม่ fill — ดูตัวอย่างจริงที่ Week6 แถว Wed 08-12 |
+
+ก่อนเริ่มสร้างไฟล์ใหม่ทุกครั้ง แนะนำให้ decode สีจากไฟล์ WeekN-1 จริงอีกครั้งด้วย snippet ด้านบน เผื่อ Thada เปลี่ยน branding — อย่า hardcode ค่าจากตารางนี้แบบไม่เช็คซ้ำถ้าเป็นไปได้
+
 **⚠️ Summary column: bullet point สั้น ไม่ใช่ paragraph เทคนิค (ยืนยันกับ Thada 2026-08-07):** หัวหน้าไม่ต้องการรายละเอียดเทคนิคเชิงลึก (ชื่อ script, ADR number, COM automation quirk, % ตัวเลขละเอียด) ต้องการแค่ "ทำอะไร → ได้อะไร" แบบ bullet สั้นๆ อ่านเร็ว:
 - เขียนแต่ละ bullet ด้วย bullet character `[char]8226` (•) คั่นด้วย `[char]10` (newline ภายใน cell เดียวกัน) ไม่ใช่ paragraph ยาวแบบ prose
 - ตัดศัพท์เทคนิคเฉพาะทาง (ชื่อไฟล์ script, ADR-XXXX, ชื่อฟังก์ชัน/ตัวแปรโค้ด, COM/VBA quirk) ออก เหลือแค่ผลลัพธ์ทางธุรกิจ/โปรเจค
@@ -87,6 +113,19 @@ $ws.Name = "Thada"   # ชื่อ sheet เดิมตาม week ก่อ�
 3. ใส่ hyperlink ในเซลล์ Remark ของแต่ละแถว ด้วย `Worksheet.Hyperlinks.Add(cell, address, subaddress, screentip, textToDisplay)` — `address` เป็น relative filename เฉยๆ (เช่น `"2026-08-07.pdf"`) ไม่ใช่ full path เพราะไฟล์อยู่โฟลเดอร์เดียวกัน, `textToDisplay` = `"For more detail please follow link :"` (ข้อความเดิมทุกครั้ง ไม่เปลี่ยน)
 
 **❌ ห้ามใช้ Edge/Chrome headless (`msedge --headless --print-to-pdf`) เพื่อแปลง PDF (บทเรียน 2026-08-07):** เคยลองแล้วค้าง (hang เกิน 120s) ต้อง `taskkill /F /IM msedge.exe` เพื่อเคลียร์ — คำสั่งนี้ฆ่า Edge process **ทั้งหมดในเครื่อง** รวมถึง browser session จริงของ Thada (มีถึง ~19 PID ที่ไม่เกี่ยวข้องโดนฆ่าไปด้วยรอบหนึ่ง) เป็นความเสี่ยงที่ยอมรับไม่ได้ **ใช้ Word COM (`ExportAsFixedFormat`) เท่านั้นสำหรับแปลง .md → PDF** ปลอดภัยกว่ามาก ไม่แตะ process อื่นของผู้ใช้เลย
+
+**⚠️ ถ้าวันนั้นมีการเขียน how-to/hand-off guide ฉบับเต็มลง vault (เช่น `Projects/SPC/How to/*.md`) ให้ลิงก์ Remark ไปที่ guide แทน daily-log PDF ธรรมดา (ยืนยันกับ Thada 2026-08-21):**
+- ใช้ `scripts/md-to-pdf-with-images.ps1` (ไม่ใช่ `md-to-pdf.ps1` ตัวธรรมดา) — ต่างกันตรงที่ตัวนี้ embed รูป `![alt](attachments/.../xxx.png)` เข้าไปในเอกสารจริง (ผ่าน `InlineShapes.AddPicture`) และข้าม ```mermaid``` code fence (Word render ไม่ได้) เพราะ guide พวกนี้มักมี screenshot ประกอบทุกขั้นตอนที่หัวหน้าควรเห็น ไม่ใช่แค่ข้อความ
+  ```powershell
+  powershell.exe -File "<skill-dir>\scripts\md-to-pdf-with-images.ps1" `
+    -MdPath "D:\Obsidian\Thadaverse\Projects\SPC\How to\Require-Add-Spec-Guide.md" `
+    -PdfPath "X:\QM\IMS\Thada\Report\WeekN\Require-Add-Spec-Guide.pdf" `
+    -TitleText "Require Add Spec - Full Guide"
+  ```
+- ตั้งชื่อไฟล์ PDF ตามชื่อ guide note (ไม่ใช่ตามวันที่) วางไว้โฟลเดอร์เดียวกับ Excel
+- Hyperlink ในแถวของวันนั้นชี้ไปไฟล์ guide PDF นี้แทน `YYYY-MM-DD.pdf` (ข้อความ `"For more detail please follow link :"` เหมือนเดิม)
+- วันอื่นๆ ที่ไม่มี guide ฉบับเต็ม ยังคงลิงก์ไป daily-log PDF ตามปกติ (`md-to-pdf.ps1` ธรรมดา)
+- ไฟล์ daily-log PDF ของวันนั้นจะไม่มีลิงก์ชี้ไปแล้ว แต่ไม่ต้องลบทิ้งอัตโนมัติ — ถามหรือรอ Thada สั่งก่อน (กฎ "ระวังใน `X:\QM\IMS\Thada\`" ด้านบน)
 
 **Path:** `X:\QM\IMS\Thada\Report\WeekN\<ชื่อไฟล์เดียวกับ week ก่อนหน้า>.xlsx` (เช่น `ThadaN.090077.xlsx` — เช็คชื่อไฟล์จาก week ก่อนหน้าเสมอ อย่าเปลี่ยนชื่อเอง)
 
@@ -144,3 +183,5 @@ $ws.Columns.Item(2).ColumnWidth = 11.43
 - [ ] **ไม่ได้ใช้ Edge/Chrome headless หรือ `taskkill /IM msedge.exe`** สำหรับแปลง PDF — ใช้ Word COM เท่านั้น
 - [ ] Excel/Word ปิด COM object สะอาด ไม่มี orphan process/lock file ค้าง (เช็ค `MainWindowTitle` ก่อนฆ่า process ใดๆ)
 - [ ] ไฟล์เสริม (mind map, README, daily-log PDFs) copy ตามความเหมาะสม
+- [ ] **สี/alignment ของ Excel ตรงกับ WeekN-1 เป๊ะ** (title/header navy, update-badge coral, status สีตาม Completed/In-progress, WW column merge ข้ามแถว, Summary ชิดซ้าย-บนสีนาวี) — decode สีจริงด้วย `[System.Drawing.ColorTranslator]::FromOle()` ก่อนเทียบ ไม่เดาด้วยตา
+- [ ] วันที่มี guide ฉบับเต็ม (how-to/hand-off) ลิงก์ Remark ไปที่ guide PDF (ผ่าน `md-to-pdf-with-images.ps1`) แทน daily-log PDF ธรรมดา
