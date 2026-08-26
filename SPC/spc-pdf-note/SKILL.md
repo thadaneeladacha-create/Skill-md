@@ -72,7 +72,7 @@ D:\Obsidian\Thadaverse\Projects\SPC\knowledge\<slug>.md
 
 ถ้า Thada ขอ mind map แบบ interactive (เคยทำมาแล้วสำหรับ company-overview และ AIAG SPC Chapter 1):
 
-1. Copy `assets/mindmap-template.html` (bundled ใน skill นี้) ไปเป็นไฟล์ปลายทางที่ `notes\knowledge\assets\<slug>-mindmap.html`
+1. Copy `assets/mindmap-template.html` (bundled ใน skill นี้) ไปเป็นไฟล์ปลายทางที่ `Projects\SPC\knowledge\assets\<slug>-mindmap.html`
 2. แก้ 4 จุดที่ comment กำกับไว้ในไฟล์ (`EDIT 1`-`EDIT 4`): header text, hint text, legend labels, และ `const DATA` tree
 3. ออกแบบ `DATA` tree จากเนื้อหาที่สรุปไว้แล้วใน `.md` — แนะนำ **4 กิ่งหลัก (L1)** เพื่อความสมดุลของภาพ, เก็บ label สั้น (2-4 คำต่อบรรทัด, node กว้างคงที่ 236px), ใส่ `detail` ทุก node ที่มีเนื้อหาจริง (คลิกแล้วเปิด panel), `tag` เป็น section reference (เช่น `"SECTION E"`)
 4. ถ้ามีรูปจากขั้นตอนที่ 7 อยากให้โผล่ใน mind map ด้วย: แปลงเป็น base64 แล้วใส่เป็น `img: ["data:image/png;base64,..."]` ในโหนดที่เกี่ยวข้อง — **อย่า paste base64 ยาวๆ ผ่าน Edit/Write tool ตรงๆ** (กิน context มหาศาล) ให้เขียน PowerShell script อ่านไฟล์รูปด้วย `[System.IO.File]::ReadAllBytes` + `[Convert]::ToBase64String` แล้วต่อ string เข้าไฟล์ HTML ด้วย `[System.IO.File]::ReadAllText`/`WriteAllText` (UTF8 no-BOM) แทน — ดูตัวอย่าง pattern ได้จาก daily log 2026-07-08 ถ้าต้องการ
