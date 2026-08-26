@@ -1,6 +1,6 @@
 ---
 name: machine-learning
-description: ใช้ skill นี้ทุกครั้งที่ผู้ใช้ต้องการสร้าง ฝึก ประเมิน หรือ deploy โมเดล Machine Learning ครอบคลุมการเตรียมข้อมูล (data preprocessing), การเลือกอัลกอริทึม (classification, regression, clustering), การ train model ด้วย scikit-learn / PyTorch / TensorFlow, การประเมินผลด้วย metrics ต่าง ๆ (accuracy, F1, RMSE), การทำ hyperparameter tuning, cross-validation รวมถึงการแก้ปัญหา overfitting/underfitting และการสร้าง pipeline สำหรับ ML. ให้ trigger ทันทีเมื่อผู้ใช้พูดถึง "โมเดล", "เทรนโมเดล", "ML", "AI", "predict", "classification", "regression", "neural network", "deep learning", "sklearn", "pandas สำหรับ ML", หรือเมื่ออัพโหลด dataset (.csv, .parquet) แล้วถามว่าจะวิเคราะห์/พยากรณ์ยังไง แม้ไม่ได้พูดคำว่า "machine learning" ตรง ๆ ก็ตาม
+description: ใช้ skill นี้ทุกครั้งที่ผู้ใช้ต้องการสร้าง ฝึก ประเมิน หรือ deploy โมเดล Machine Learning ครอบคลุมการเตรียมข้อมูล (data preprocessing), การเลือกอัลกอริทึม (classification, regression, clustering, anomaly detection), การ train model ด้วย scikit-learn / PyTorch / TensorFlow / PyCaret (AutoML), การประเมินผลด้วย metrics ต่าง ๆ (accuracy, F1, RMSE), การทำ hyperparameter tuning, cross-validation รวมถึงการแก้ปัญหา overfitting/underfitting และการสร้าง pipeline สำหรับ ML. ให้ trigger ทันทีเมื่อผู้ใช้พูดถึง "โมเดล", "เทรนโมเดล", "ML", "AI", "predict", "classification", "regression", "neural network", "deep learning", "sklearn", "pycaret", "AutoML", "anomaly detection", "pandas สำหรับ ML", หรือเมื่ออัพโหลด dataset (.csv, .parquet) แล้วถามว่าจะวิเคราะห์/พยากรณ์ยังไง แม้ไม่ได้พูดคำว่า "machine learning" ตรง ๆ ก็ตาม
 ---
 
 # Machine Learning Skill
@@ -130,6 +130,42 @@ assets/
 2. ใช้ TF-IDF หรือ embedding สำหรับ feature extraction
 3. ลอง Logistic Regression เป็น baseline ก่อนข้ามไป transformer
 4. ประเมินด้วย F1-score (เพราะมัก imbalance)
+
+## PyCaret (AutoML multi-algorithm benchmark — ทางเลือกเสริม)
+
+ใช้เมื่อผู้ใช้อยากเทียบหลายอัลกอริทึมพร้อมกันเร็วๆ (แทนการเขียน sklearn ทีละโมเดล) โดยเฉพาะงาน **anomaly detection** ที่ label ฝั่ง minority class มีน้อยเกินจะทำ supervised classification (ดูตัวอย่างจริงที่ทำมาแล้วใน [[pycaret-anomaly-comparison-2026-08-04]] — miss-judgment XPort LED)
+
+### ⚠️ ต้องแยก environment เสมอ — ห้ามลงใน base env
+
+เครื่องนี้ (miniconda base) มักมี Python เวอร์ชันใหม่กว่าที่ PyCaret รองรับมาก (พบแล้ว: base = Python 3.14 + pandas 3.x/sklearn 1.9) แต่ **PyCaret 3.3.2 pin เวอร์ชันเก่ากว่ามาก** (`numpy<1.27`, `pandas<2.2.0`, `scipy<=1.11.4`) — ลงรวมกับ base env จะพัง package เดิมที่ project อื่นใช้อยู่ ต้องสร้าง conda env แยกทุกครั้ง:
+
+```bash
+# ต้องใช้ --override-channels -c conda-forge เสมอ — ถ้าไม่ใส่ --override-channels
+# conda จะดึง default channel (repo.anaconda.com) มาด้วยและ error เรื่อง
+# "Terms of Service have not been accepted" (เครื่องนี้ไม่เคย accept ToS ไว้
+# และไม่ควร accept แทนผู้ใช้เองโดยไม่ถาม — legal agreement)
+conda create -n <env_name> --override-channels -c conda-forge python=3.10 -y
+
+# ถ้าเจอ ZstdError("Allocation error: not enough memory") กลางทาง —
+# เครื่องนี้ RAM ว่างต่ำ (เคยเจอเหลือ ~2.3GB) ให้ conda clean --all -y
+# แล้ว retry คำสั่งเดิมซ้ำ มักผ่านรอบสอง
+conda run -n <env_name> pip install pycaret pandas openpyxl
+conda run -n <env_name> python -c "from pycaret.anomaly import setup; print('ok')"
+```
+
+### รูปแบบการ benchmark (anomaly module)
+
+ดึงรายชื่ออัลกอริทึมจาก `models().index` ของ PyCaret เอง อย่า hardcode list เอง (จะได้ list ที่ตรงกับเวอร์ชันที่ลงจริงเสมอ) — ดู `assets/pycaret_anomaly_template.py`
+
+**Gotcha ที่เจอแล้วจริง:** algorithm `sod` (จาก `pyod`) crash ด้วย `KeyError` เมื่อ `predict_model()` รับ pandas DataFrame ตรงๆ (bug ของ pyod เอง ไม่ใช่ของเรา) — ต้อง wrap **ทั้ง** `create_model()` และ `predict_model()` ในลูปเดียวกันด้วย `try/except` ต่ออัลกอริทึม ไม่ใช่แค่ `create_model()` เฉยๆ ไม่งั้นทั้ง run จะตายกลางทางและเสียผลลัพธ์ที่คำนวณไปแล้วก่อนหน้า
+
+### ข้อจำกัดเรื่อง report/plot ในตัว
+
+`pycaret.anomaly` เป็น unsupervised module — `plot_model()` รองรับแค่ `'tsne'`/`'umap'` เท่านั้น **ไม่มี** ROC curve / confusion matrix / feature importance ให้ในตัว (ต่างจาก `pycaret.classification`/`regression` ที่มีครบ) เพราะ module นี้ไม่ผูก label ไว้ตั้งแต่ `setup()`
+
+ถ้าต้องการ ROC/confusion matrix จริงๆ และมี label ที่รู้ผลอยู่แล้ว (เอาไว้ประเมินหลังเทรนเท่านั้น ไม่ใช่เทรน) ให้ดึง `Anomaly_Score`/`Anomaly` column จาก `predict_model()` มาคำนวณเองด้วย sklearn (`roc_curve`, `confusion_matrix`) แล้วส่งต่อให้ [[ml-report]] จัดการ plot — **อย่า** เปลี่ยนไปใช้ `pycaret.classification` เพียงเพราะอยากได้ dashboard/ROC สำเร็จรูป ถ้า minority class มี n น้อยและไม่มี unit/piece ID ให้ group-split (จะเจอ data leakage เหมือนที่เคยเกิดในรายงาน XPort LED ฉบับแรกที่ต้องแก้ไขทีหลัง) — เช็คให้แน่ใจว่า group-aware split ทำได้จริงก่อนเปลี่ยน module
+
+`dashboard()` (Explainer Dashboard) และ `create_app()` (Gradio demo) ก็เป็นของ `classification`/`regression` module เท่านั้นเช่นกัน มีข้อจำกัดเดียวกัน
 
 ## หมายเหตุ
 
