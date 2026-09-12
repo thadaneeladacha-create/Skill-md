@@ -95,8 +95,10 @@ created: 2026-05-13
 | [[Engineering/post-mortem/SKILL\|post-mortem]] | `Engineering/post-mortem` | เขียนบันทึก root cause/mechanism/fix/validation/how it slipped through หลัง debug เสร็จ |
 | [[Engineering/qwen-agent/SKILL\|qwen-agent]] | `Engineering/qwen-agent` | ส่งงาน coding ที่ทำซ้ำ/ไม่ซับซ้อนไปให้ subagent Qwen (`claude-9arm`) ทำแทน ประหยัด token |
 | [[Engineering/scrutinize/SKILL\|scrutinize]] | `Engineering/scrutinize` | รีวิว plan/PR/code แบบมองจากมุมคนนอก ตั้งคำถาม intent ก่อน แล้ว trace code path จริง |
+| [[Engineering/dev-pipeline/SKILL\|dev-pipeline]] | `Engineering/dev-pipeline` | Orchestrator ร้อยลำดับ 6 skill (grill-with-docs → junior-to-senior → to-spec → to-tickets → implement → code-review) เป็น flow เดียว พร้อม gate ก่อน publish artifact ถาวร — ดู `README.md` ในโฟลเดอร์สำหรับ dependency + ปัญหาที่เจอจริง |
+| [[Engineering/setup-matt-pocock-skills/SKILL\|setup-matt-pocock-skills]] | `Engineering/setup-matt-pocock-skills` | Scaffold per-repo config (issue tracker, triage labels, domain docs) ที่ skill ชุด Matt Pocock ต้องใช้ — ดู `README.md` ในโฟลเดอร์สำหรับวิธีติดตั้ง + ปัญหาที่เจอจริง |
 
-ที่มา: [thananon/9arm-skills](https://github.com/thananon/9arm-skills) — `skills/engineering`
+ที่มา: [thananon/9arm-skills](https://github.com/thananon/9arm-skills) — `skills/engineering` (debug-mantra, post-mortem, qwen-agent, scrutinize); `dev-pipeline`/`setup-matt-pocock-skills` เขียนเอง
 
 ---
 
@@ -119,6 +121,8 @@ created: 2026-05-13
 | `Engineering/post-mortem/SKILL.md` | `post-mortem` | ✅ ติดตั้งแล้ว |
 | `Engineering/qwen-agent/SKILL.md` | `qwen-agent` | ✅ ติดตั้งแล้ว |
 | `Engineering/scrutinize/SKILL.md` | `scrutinize` | ✅ ติดตั้งแล้ว |
+| `Engineering/dev-pipeline/SKILL.md` | `dev-pipeline` | ✅ ติดตั้งแล้ว (เครื่อง forex-quant repo) |
+| `Engineering/setup-matt-pocock-skills/SKILL.md` + `agents/` + `*.md` | `setup-matt-pocock-skills` | ✅ ติดตั้งแล้ว (เครื่อง forex-quant repo) |
 
 ---
 
@@ -154,4 +158,10 @@ created: 2026-05-13
 - 2026-07-15: clone 4 skills จาก [thananon/9arm-skills](https://github.com/thananon/9arm-skills) `skills/engineering` (debug-mantra, post-mortem, qwen-agent, scrutinize) เข้า `~/.claude/skills/` บนเครื่อง Lamphun และเพิ่มเข้า vault ที่ `Engineering/` + ตาราง deployment
 - 2026-07-15 (เย็น): สร้าง skill ใหม่ `SPC/spc-abnormality-note` จากงานวิเคราะห์ XPort LED miss-judgment วันนี้ (Excel COM data pull → verify/extend ANOVA-GRR → root-cause note พร้อม Mermaid flow diagram) ติดตั้งเข้า `~/.claude/skills/` แล้ว และเพิ่มเข้า vault + ตาราง deployment — เก็บ Excel COM gotchas (orphan process/lock file, Int32 cast bug, leading "=" text bug, PowerShell case-insensitive variable collision) และบทเรียนเรื่อง Mermaid flow diagram ไว้ในตัว skill ด้วย
 - 2026-07-17: สร้าง skill ใหม่ `SPC/spc-weekly-report` จากงานทำรายงานประจำสัปดาห์ส่งหัวหน้า (Week2) — รวบรวม daily log → weekly summary note → Excel รายงานรูปแบบเดียวกับสัปดาห์ก่อนใน `X:\QM\IMS\Thada\Report\WeekN\` → sync 3 ทาง (vault/D:\SPC\notes\/external report) ติดตั้งเข้า `~/.claude/skills/` แล้ว และเพิ่มเข้า vault + ตาราง deployment — บันทึกบทเรียนเรื่องลืม mirror `D:\SPC\notes\weekly\` ไว้ในตัว skill ด้วยกันพลาดซ้ำ
+- 2026-09-13: เพิ่ม skill ใหม่ 2 ตัวเข้า `Engineering/` — `dev-pipeline` (orchestrator ร้อย grill-with-docs →
+  junior-to-senior → to-spec → to-tickets → implement เป็น flow เดียว) และ `setup-matt-pocock-skills`
+  (scaffold config: issue tracker, triage labels, domain docs) ทดสอบ `dev-pipeline` แบบ end-to-end บนโปรเจกต์
+  forex-quant-trading-ai-system ด้วย toy feature จริง พบและบันทึกปัญหาไว้ใน `README.md` ของแต่ละโฟลเดอร์:
+  `grill-with-docs`/`to-spec` เรียกผ่าน `Skill` tool อัตโนมัติไม่ได้ (`disable-model-invocation`), ต้องรัน
+  `setup-matt-pocock-skills` ก่อนเสมอ (pre-flight gate), `gh` CLI ไม่มีมาโดย default บน Windows
 - 2026-08-04: อัปเดต `Machine-learning/Bravo` (`machine-learning` skill) จากงาน PyCaret anomaly-detection benchmark สำหรับปัญหา miss-judgment XPort LED ([[pycaret-anomaly-comparison-2026-08-04]] ใน `Projects/SPC/abnormal/miss judgement/`) — เพิ่ม section "PyCaret (AutoML multi-algorithm benchmark)": วิธีสร้าง conda env แยกให้ถูกต้อง (`--override-channels -c conda-forge` กัน Anaconda ToS block, วิธีแก้ ZstdError จาก RAM ต่ำ), gotcha เรื่อง `sod` algorithm crash ใน `pyod`, และข้อจำกัดของ `pycaret.anomaly.plot_model()`/`dashboard()`/`create_app()` (ใช้ได้เฉพาะ classification/regression module) เพิ่ม asset ใหม่ `assets/pycaret_anomaly_template.py` และปรับ description ให้มีคำว่า "pycaret"/"AutoML"/"anomaly detection" — sync กับ `~/.claude/skills/machine-learning/` แล้ว ยังไม่ commit ขึ้น GitHub
